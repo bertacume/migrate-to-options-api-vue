@@ -248,11 +248,12 @@ function parseCode(codeSection) {
     const lastLine = codeLines[codeLines.length - 1];
     const splittedByClosingOpts = lastLine.split('})');
     const rawActionNameAndType = splittedByClosingOpts[splittedByClosingOpts.length - 1];
-    const [rawPropName, rawType] = rawActionNameAndType.split(':');
-    const propName = removeEmptySpacesFrom(rawPropName, 'start').slice(0, -1);
+    const [rawPropNameWithSpaces, rawType] = rawActionNameAndType.split(':');
+    const rawPropName = removeEmptySpacesFrom(rawPropNameWithSpaces, 'start');
+    const propName = rawPropName[rawPropName.length - 1] === ';' ?  rawPropName.slice(0, -1) : rawPropName;
 
     const linesWithoutDecorator = removeEmptySpacesFrom(codeLinesStr, 'start').split('@Prop(');
-    const rawPropDefinition = linesWithoutDecorator[1].split(`)${rawPropName}`)[0];
+    const rawPropDefinition = linesWithoutDecorator[1].split(`)${rawPropNameWithSpaces}`)[0];
     const propDefinition = removeEmptySpacesFrom(rawPropDefinition, 'start');
     let updatedPropDefinition;
     if (rawType && !propDefinition.includes('type:')) {
@@ -261,7 +262,8 @@ function parseCode(codeSection) {
       const endIndex = rawTypeWithouSpaces[rawTypeWithouSpaces.length - 1] === ';' ? -1 : rawTypeWithouSpaces.length;
       const type = rawTypeWithouSpaces[0].toUpperCase() + rawTypeWithouSpaces.slice(1, endIndex);
       const isEndedWithComa = cleanEndPropDefinition[cleanEndPropDefinition.length - 1] === ',';
-      updatedPropDefinition = `${cleanEndPropDefinition}${isEndedWithComa ? '' : ','} type: ${type}, }`;
+      const isPropDefinitionEmpty = cleanEndPropDefinition === '{';
+      updatedPropDefinition = `${cleanEndPropDefinition}${isEndedWithComa || isPropDefinitionEmpty ? '' : ','} type: ${type}, }`;
     }
     return formatCode(`  ${propName}: ${updatedPropDefinition || propDefinition},`, '  ');
   }
