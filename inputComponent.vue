@@ -1,0 +1,1 @@
+// replace content with a VUE component - decorator api

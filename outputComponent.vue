@@ -1,0 +1,1 @@
+// content will be replaced with migrated VUE component - options api

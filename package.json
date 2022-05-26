@@ -1,0 +1,11 @@
+{
+  "name": "migrate-to-options-api-vue",
+  "version": "1.0.0",
+  "description": "Utility to migrate vue files from decorators api to options api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
