@@ -39,13 +39,13 @@ fs.readFile('./inputComponent.vue', 'utf8', (err, data) => {
     let cleanedComponentDecoratorStr = cleanString(componentDecoratorStr);
     const isLastCharAComa = cleanedComponentDecoratorStr[cleanedComponentDecoratorStr.length - 1] === ',';
     if (!isLastCharAComa) cleanedComponentDecoratorStr += ',';
-    let replacedVueComponent = data.replace('{{{ component }}}', cleanedComponentDecoratorStr);
+    let replacedVueComponent = data.replace('{{{ component }}}', () => cleanedComponentDecoratorStr);
     
     const name = componentClassStr.substring(
       componentClassStr.indexOf('class') + 6,
       componentClassStr.indexOf('extends') -1
     );
-    replacedVueComponent = replacedVueComponent.replace('{{{ name }}}', `'${name}'`)
+    replacedVueComponent = replacedVueComponent.replace('{{{ name }}}', () => `'${name}'`)
 
     const componentConentStr = componentClassStr.split('Vue {', 2)[1];
     const lines = componentConentStr.split('\n');
@@ -164,17 +164,17 @@ fs.readFile('./inputComponent.vue', 'utf8', (err, data) => {
 
     const defaultText = '// ------> REMOVE SECTION <------';
 
-    replacedVueComponent = replacedVueComponent.replace('{{{ template }}}', `${templateCode}</template>`);
-    replacedVueComponent = replacedVueComponent.replace('{{{ style }}}', styleCode);
+    replacedVueComponent = replacedVueComponent.replace('{{{ template }}}', () => `${templateCode}</template>`);
+    replacedVueComponent = replacedVueComponent.replace('{{{ style }}}', () => styleCode);
 
-    replacedVueComponent = replacedVueComponent.replace('{{{ imports }}}', imports.join('') || defaultText);
-    replacedVueComponent = replacedVueComponent.replace('{{{ props }}}', parsedPropLines.join('\n') || defaultText);
-    replacedVueComponent = replacedVueComponent.replace('{{{ data }}}', parsedDataLines.join('\n') || defaultText);
-    replacedVueComponent = replacedVueComponent.replace('{{{ mapActions }}}', parsedActionLines.join('\n') || defaultText);
-    replacedVueComponent = replacedVueComponent.replace('{{{ mapGetters }}}', parsedGetterLines.join('\n') || defaultText);
-    replacedVueComponent = replacedVueComponent.replace('{{{ computed }}}', parsedComputedLines.join('\n') || defaultText);
-    replacedVueComponent = replacedVueComponent.replace('{{{ lifecycleEvents }}}', parsedLifecycleEventsLines.join('\n') || defaultText);
-    replacedVueComponent = replacedVueComponent.replace('{{{ methods }}}', parsedMethodLines.join('\n') || defaultText);
+    replacedVueComponent = replacedVueComponent.replace('{{{ imports }}}', () => imports.join('') || defaultText);
+    replacedVueComponent = replacedVueComponent.replace('{{{ props }}}', () => parsedPropLines.join('\n') || defaultText);
+    replacedVueComponent = replacedVueComponent.replace('{{{ data }}}', () => parsedDataLines.join('\n') || defaultText);
+    replacedVueComponent = replacedVueComponent.replace('{{{ mapActions }}}', () => parsedActionLines.join('\n') || defaultText);
+    replacedVueComponent = replacedVueComponent.replace('{{{ mapGetters }}}', () => parsedGetterLines.join('\n') || defaultText);
+    replacedVueComponent = replacedVueComponent.replace('{{{ computed }}}', () => parsedComputedLines.join('\n') || defaultText);
+    replacedVueComponent = replacedVueComponent.replace('{{{ lifecycleEvents }}}', () => parsedLifecycleEventsLines.join('\n') || defaultText);
+    replacedVueComponent = replacedVueComponent.replace('{{{ methods }}}', () => parsedMethodLines.join('\n') || defaultText);
 
     console.log(replacedVueComponent)
       
