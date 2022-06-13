@@ -1,6 +1,7 @@
 const fs = require('fs');
 
 const lifecyleEvents = [
+  'head', // Nuxt
   'asyncData', // Nuxt
   'beforeCreate', // Vue
   'created', // Vue
