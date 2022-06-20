@@ -56,12 +56,25 @@ fs.readFile('./inputComponent.vue', 'utf8', (err, data) => {
     while (i < lines.length) {
       let group = { lines: [], type: null };
       const rawLine = lines[i];
-      let lineCleaned = cleanString(rawLine, 'start');
+      let lineCleaned = cleanString(rawLine);
       let nextLine = i + 1;
 
       if (!lineCleaned.startsWith('//')) {
-        // PROP
-        if (lineCleaned.startsWith('@Prop(')) {
+        // WATCH
+        if (lineCleaned.startsWith('@Watch(')) {
+          const [indentation, rawWatchedProperty] = rawLine.split('@Watch(');
+          const watchedProperty = cleanString(rawWatchedProperty).slice(1, -2);
+          const indexStartMethodName = i + 1;
+          const { endIndex, joinedLines } = joinedUntilSameIndentation(lines, indentation, indexStartMethodName);
+          group.type = 'WATCH';
+          const methodName = `${indentation}${watchedProperty}() {`;
+          const methodLinesWithoutName = joinedLines.slice(1);
+          const methodLines = [methodName, ...methodLinesWithoutName]
+          group.lines = methodLines;
+          nextLine = endIndex + 1;
+          joinedCodeSections.push(group);
+          // PROP
+        } else if (lineCleaned.startsWith('@Prop(')) {
           const { endIndex, joinedLines } = joinUntilSemicolon(lines, i);
           group.type = 'PROP';
           group.lines = joinedLines;
@@ -132,6 +145,7 @@ fs.readFile('./inputComponent.vue', 'utf8', (err, data) => {
       i = nextLine;
     }
 
+    const parsedWatchLines = [];
     const parsedPropLines = [];
     const parsedActionLines = [];
     const parsedGetterLines = [];
@@ -143,7 +157,9 @@ fs.readFile('./inputComponent.vue', 'utf8', (err, data) => {
     for (let i = 0; i < joinedCodeSections.length; i++) {
       const codeSection = joinedCodeSections[i];
       const parsed = parseCode(codeSection);
-      if (codeSection.type === 'PROP') {
+      if (codeSection.type === 'WATCH') {
+        parsedWatchLines.push(parsed);
+      } else if (codeSection.type === 'PROP') {
         parsedPropLines.push(parsed);
       } else if (codeSection.type === 'DATA') {
         parsedDataLines.push(parsed);
@@ -174,6 +190,7 @@ fs.readFile('./inputComponent.vue', 'utf8', (err, data) => {
     replacedVueComponent = replacedVueComponent.replace('{{{ mapActions }}}', () => parsedActionLines.join('\n') || defaultText);
     replacedVueComponent = replacedVueComponent.replace('{{{ mapGetters }}}', () => parsedGetterLines.join('\n') || defaultText);
     replacedVueComponent = replacedVueComponent.replace('{{{ computed }}}', () => parsedComputedLines.join('\n') || defaultText);
+    replacedVueComponent = replacedVueComponent.replace('{{{ watchers }}}', () => parsedWatchLines.join('\n') || defaultText);
     replacedVueComponent = replacedVueComponent.replace('{{{ lifecycleEvents }}}', () => parsedLifecycleEventsLines.join('\n') || defaultText);
     replacedVueComponent = replacedVueComponent.replace('{{{ methods }}}', () => parsedMethodLines.join('\n') || defaultText);
 
@@ -245,6 +262,11 @@ function cleanString(str) {
 function parseCode(codeSection) {
   const codeLines = codeSection.lines;
   const codeLinesStr = codeLines.join('\n');
+
+  if (codeSection.type === 'WATCH') {
+    return formatCode(codeLinesStr + ',', '  ');
+  }
+
   if (codeSection.type === 'PROP') {
     const lastLine = codeLines[codeLines.length - 1];
     const splittedByClosingOpts = lastLine.split('})');
