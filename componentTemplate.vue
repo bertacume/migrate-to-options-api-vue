@@ -21,6 +21,9 @@ export default Vue.extend({
     }),
 {{{ computed }}}
   },
+  watch: {
+{{{ watchers }}}
+  },
 {{{ lifecycleEvents }}}
   methods: {
     ...mapActions({
